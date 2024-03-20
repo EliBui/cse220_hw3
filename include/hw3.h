@@ -2,7 +2,9 @@
 
 typedef struct GameState
 {
-    // define your struct here
+    int numOfRow;
+    int numOfCol;
+    char **board[];
 } GameState;
 
 GameState* initialize_game_state(const char *filename);
