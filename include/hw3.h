@@ -1,10 +1,11 @@
 #include <stdlib.h>
 
-typedef struct GameState
-{
+typedef struct GameState {
     int numOfRow;
     int numOfCol;
     char **board[];
+    int **boardDepth[];
+    struct GameState *previous;
 } GameState;
 
 GameState* initialize_game_state(const char *filename);
