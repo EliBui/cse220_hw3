@@ -3,8 +3,8 @@
 typedef struct GameState {
     int numOfRow;
     int numOfCol;
-    char **board[];
-    int **boardDepth[];
+    char **board;
+    int **boardDepth;
     struct GameState *previous;
 } GameState;
 
