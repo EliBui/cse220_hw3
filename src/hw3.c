@@ -206,6 +206,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
                 newBoard[r][c] = *tiles;
                 tiles++;
                 newBoardDepth[r][c] = boardDepth[r][c]+1;
+                tilesPlaced++;
             } else if(r >= game->numOfRow || c >= game->numOfCol) {
                 //falls outside the bound of the old board
                 newBoard[r][c] = '.';
@@ -222,6 +223,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     newGame->boardDepth = newBoardDepth;
     newGame->previous = game;
 
+    *num_tiles_placed = tilesPlaced;
     return newGame;
 }
 
