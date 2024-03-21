@@ -67,7 +67,7 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
     }
 
     char **board = game->board;
-    char **boardDepth = game->boardDepth;
+    int **boardDepth = game->boardDepth;
 
     char fullWordCreated[46];//45 is the length of the longest word in the english dictionary
     int index = 0;
@@ -167,7 +167,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     }
 
     char **board = game->board;
-    char **boardDepth = game->boardDepth;
+    int **boardDepth = game->boardDepth;
 
     struct GameState *newGame = (struct GameState*)malloc(sizeof(struct GameState));
     
