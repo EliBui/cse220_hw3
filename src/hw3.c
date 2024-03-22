@@ -5,7 +5,6 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "hw3.h"
-#include "hw3.h"
 
 #define DEBUG(...)                              \
     fprintf(stderr, "[          ] [ DEBUG ] "); \
@@ -62,7 +61,6 @@ GameState *initialize_game_state(const char *filename) {
         }
     }
 
-    GameState *game = (GameState *)malloc(sizeof(GameState));
     GameState *game = (GameState *)malloc(sizeof(GameState));
     game->numOfRow = numOfRow;
     game->numOfCol = numOfCol;
