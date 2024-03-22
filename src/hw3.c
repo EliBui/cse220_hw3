@@ -5,7 +5,12 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "hw3.h"
+#include "hw3.h"
 
+#define DEBUG(...)                              \
+    fprintf(stderr, "[          ] [ DEBUG ] "); \
+    fprintf(stderr, __VA_ARGS__);               \
+    fprintf(stderr, " -- %s()\n", __func__)
 #define DEBUG(...)                              \
     fprintf(stderr, "[          ] [ DEBUG ] "); \
     fprintf(stderr, __VA_ARGS__);               \
@@ -19,9 +24,9 @@ GameState *initialize_game_state(const char *filename) {
     char c;
     char numOfRow = 0;
     char numOfCol = 0;
-    while(fscanf(file, "%c", &c) == 1) {
-        if(c != '\n') {
-            if(numOfRow == 0) {
+    while (fscanf(file, "%c", &c) == 1) {
+        if (c != '\n') {
+            if (numOfRow == 0) {
                 numOfCol++;
             }
         } else {
@@ -30,25 +35,25 @@ GameState *initialize_game_state(const char *filename) {
     }
 
     char **board = (char **)malloc(numOfRow * sizeof(char *));
-    for(int i = 0; i < numOfRow; i++) {
+    for (int i = 0; i < numOfRow; i++) {
         board[i] = (char *)malloc(numOfCol * sizeof(char));
     }
 
     int **boardDepth = (int **)malloc(numOfRow * sizeof(int *));
-    for(int i = 0; i < numOfRow; i++) {
+    for (int i = 0; i < numOfRow; i++) {
         boardDepth[i] = (int *)malloc(numOfCol * sizeof(int));
     }
 
-    rewind(file); //move pointer of file back to beginning
+    rewind(file); // move pointer of file back to beginning
 
-    for(int i = 0; i < numOfRow; i++) {
-        for(int j = 0; j < numOfCol; j++) {
+    for (int i = 0; i < numOfRow; i++) {
+        for (int j = 0; j < numOfCol; j++) {
             fscanf(file, "%c", &c);
             if(c != '\n') {
                 // printf("%d %d %c |", i, j, c);
                 board[i][j] = c;
                 boardDepth[i][j] = (c == '.') ? 0 : 1;
-                if(c != '.') {
+                if (c != '.') {
                     firstWord = false;
                 }
             } else {
@@ -58,9 +63,11 @@ GameState *initialize_game_state(const char *filename) {
     }
 
     GameState *game = (GameState *)malloc(sizeof(GameState));
+    GameState *game = (GameState *)malloc(sizeof(GameState));
     game->numOfRow = numOfRow;
     game->numOfCol = numOfCol;
     game->board = board;
+    game->boardDepth = boardDepth;
     game->boardDepth = boardDepth;
     game->previous = NULL;
 
@@ -76,14 +83,14 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
 
     if(row < 0 || col < 0 || row > game->numOfRow || col > game->numOfCol) {
         return false;
-    } else if(direction != 'H' && direction != 'V') {
+    } else if (direction != 'H' && direction != 'V') {
         return false;
     }
 
     char **board = game->board;
     int **boardDepth = game->boardDepth;
 
-    char fullWordCreated[46];//45 is the length of the longest word in the english dictionary
+    char fullWordCreated[46]; // 45 is the length of the longest word in the english dictionary
     int index = 0;
 
     int r, c;
@@ -202,7 +209,7 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
     (void)tiles;
 
     int tilesPlaced = 0;
-    if(!checkValid(game, row, col, direction, tiles)) {
+    if (!checkValid(game, row, col, direction, tiles)) {
         *num_tiles_placed = tilesPlaced;
         return game;
     }
@@ -227,6 +234,7 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
         newGame->numOfCol = game->numOfCol;
         newGame->numOfRow = game->numOfRow;
     }
+
 
     char **newBoard = (char **)malloc(newGame->numOfRow * sizeof(char *));
     for(int i = 0; i < newGame->numOfRow; i++) {
@@ -261,6 +269,7 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
             }
         }
     }
+
 
     newGame->board = newBoard;
     newGame->boardDepth = newBoardDepth;
