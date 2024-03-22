@@ -4,13 +4,17 @@
 #include <ctype.h>
 #include <assert.h>
 #include <stdbool.h>
-#include "hw3.h" 
+#include "hw3.h"
 
-#define DEBUG(...) fprintf(stderr, "[          ] [ DEBUG ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, " -- %s()\n", __func__)
+#define DEBUG(...)                              \
+    fprintf(stderr, "[          ] [ DEBUG ] "); \
+    fprintf(stderr, __VA_ARGS__);               \
+    fprintf(stderr, " -- %s()\n", __func__)
 
 bool firstWord = true;
 
-GameState* initialize_game_state(const char *filename) {
+GameState *initialize_game_state(const char *filename) {
+    (void)filename;
     FILE *file = fopen(filename, "r");
     char c;
     char numOfRow = 0;
@@ -41,25 +45,35 @@ GameState* initialize_game_state(const char *filename) {
         for(int j = 0; j < numOfCol; j++) {
             fscanf(file, "%c", &c);
             if(c != '\n') {
+                // printf("%d %d %c |", i, j, c);
                 board[i][j] = c;
                 boardDepth[i][j] = (c == '.') ? 0 : 1;
                 if(c != '.') {
                     firstWord = false;
                 }
+            } else {
+                j--;
             }
         }
     }
 
-    struct GameState *game = (struct GameState*)malloc(sizeof(struct GameState));
+    GameState *game = (GameState *)malloc(sizeof(GameState));
     game->numOfRow = numOfRow;
     game->numOfCol = numOfCol;
     game->board = board;
+    game->boardDepth = boardDepth;
     game->previous = NULL;
 
     return game;
 }
 
 bool checkValid(GameState *game, int row, int col, char direction, const char *tiles) {
+    (void)game;
+    (void)row;
+    (void)col;
+    (void)direction;
+    (void)tiles;
+
     if(row < 0 || col < 0 || row > game->numOfRow || col > game->numOfCol) {
         return false;
     } else if(direction != 'H' && direction != 'V') {
@@ -74,7 +88,16 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
 
     int r, c;
     bool stuffBefore = false, spaceInTiles = false, stuffAfter = false;//for checking if covers up the entire previous word
-    
+
+    (void)board;
+    (void)boardDepth;
+    (void)fullWordCreated;
+    (void)index;
+    (void)r;
+    (void)c;
+    (void)stuffBefore;
+    (void)stuffAfter;
+    (void)spaceInTiles;
     //add any char before tiles to the word
     r = (direction == 'V') ? row-1 : row;
     c = (direction == 'H') ? col-1 : col;
@@ -123,6 +146,9 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
 
     //add stuff after tile to word
     while(r < game->numOfRow && c < game->numOfCol) {
+        // printf("r: %d\n", r);
+        // printf("c: %d\n", c);
+        // printf("board: %c\n", board[r][c]);
         if(board[r][c] == '.') {
             break;
         } else {
@@ -144,13 +170,22 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
     }
 
     //check if word exists in word.txt
-    FILE *wordTxt = fopen("words.txt", "r");
+    FILE *wordTxt = fopen("./tests/words.txt", "r");
+    
+    // if((wordTxt = fopen("./tests/words.txt", "r")) == NULL) {
+    //     printf("wordTxt Null\n");
+    //     exit(EXIT_FAILURE);
+    // }
+
     fullWordCreated[index] = '\n';//there's a \n char at the end of all words in words.txt
     index++;
     fullWordCreated[index] = '\0';
     index++;
     char str[46];//45 is the length of the longest word in the english dictionary
     while(fgets(str, 46, wordTxt) != NULL) {
+        for(int i = 0; str[i] != '\n'; i++) {
+            str[i] = toupper(str[i]);
+        }
         if(strcmp(fullWordCreated, str) == 0) {
             return true;
         }
@@ -159,7 +194,13 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
     return false;
 }
 
-GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed) {
+GameState *place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed) {
+    (void)game;
+    (void)row;
+    (void)col;
+    (void)direction;
+    (void)tiles;
+
     int tilesPlaced = 0;
     if(!checkValid(game, row, col, direction, tiles)) {
         *num_tiles_placed = tilesPlaced;
@@ -169,24 +210,24 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     char **board = game->board;
     int **boardDepth = game->boardDepth;
 
-    struct GameState *newGame = (struct GameState*)malloc(sizeof(struct GameState));
-    
-    int tilesLen = 0;
-    while(*tiles != '\0') {
-        tilesLen++;
-    }
+    GameState *newGame = (GameState*)malloc(sizeof(GameState));
+
+    (void)newGame;
+    (void)board;
+    (void)boardDepth;
+    int tilesLen = strlen(tiles);
 
     if(direction == 'H' && col + tilesLen > game->numOfCol) {//check if board needs to be expanded
         newGame->numOfCol = col + tilesLen;
-        newGame->numOfRow = row;
+        newGame->numOfRow = game->numOfRow;
     } else if(direction == 'V' && row + tilesLen > game->numOfRow) {
-        newGame->numOfCol = col;
+        newGame->numOfCol = game->numOfCol;
         newGame->numOfRow = row + tilesLen;
     } else {
-        newGame->numOfCol = col;
-        newGame->numOfRow = row;
+        newGame->numOfCol = game->numOfCol;
+        newGame->numOfRow = game->numOfRow;
     }
-    
+
     char **newBoard = (char **)malloc(newGame->numOfRow * sizeof(char *));
     for(int i = 0; i < newGame->numOfRow; i++) {
         newBoard[i] = (char *)malloc(newGame->numOfCol * sizeof(char));
@@ -197,28 +238,30 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
         newBoardDepth[i] = (int *)malloc(newGame->numOfCol * sizeof(int));
     }
 
-    tiles -= tilesLen;//brings pointer back to beginning of the string
     for(int r = 0; r < newGame->numOfRow; r++) {
         for(int c = 0; c < newGame->numOfCol; c++) {
             if((direction == 'H' && r == row && c >= col && c < col+tilesLen && *tiles != ' ') ||
                 (direction == 'V' && r >= row && c == col && r < row+tilesLen && *tiles != ' ')) {
                 //falls within tiles on the board
                 newBoard[r][c] = *tiles;
+                // printf("%d %d %c |", r, c, newBoard[r][c]);
                 tiles++;
                 newBoardDepth[r][c] = boardDepth[r][c]+1;
                 tilesPlaced++;
             } else if(r >= game->numOfRow || c >= game->numOfCol) {
                 //falls outside the bound of the old board
                 newBoard[r][c] = '.';
+                // printf("%d %d %c |", r, c, newBoard[r][c]);
                 newBoardDepth[r][c] = 0;
             } else {
                 //copied from old board
                 newBoard[r][c] = board[r][c];
+                // printf("%d %d %c |", r, c, newBoard[r][c]);
                 newBoardDepth[r][c] = boardDepth[r][c];
             }
         }
     }
-    
+
     newGame->board = newBoard;
     newGame->boardDepth = newBoardDepth;
     newGame->previous = game;
@@ -227,7 +270,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     return newGame;
 }
 
-GameState* undo_place_tiles(GameState *game) {
+GameState *undo_place_tiles(GameState *game) {
     (void)game;
     return NULL;
 }
