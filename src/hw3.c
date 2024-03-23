@@ -300,8 +300,41 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
 }
 
 bool checkCoverFullWord(GameState *game, GameState *newGame, int row, int col, char direction) {
-    char *line[(direction == 'H') ? row : col];
-    int lineIndex = 0;
+    int length = (direction == 'H') ? game->numOfRow : game->numOfCol;
+    char **oldBoardDepth = game->boardDepth;
+    char **newBoardDepth = newGame->boardDepth;
+    int oldLine[length];
+    int newLine[length];//we dont care about elements that are beyond the old board
+
+    for(int i = 0; i < length; i++) {
+        if(direction == 'H') {
+            oldLine[i] = oldBoardDepth[row][i];
+            newLine[i] = newBoardDepth[row][i];
+        } else {
+            oldLine[i] = oldBoardDepth[i][col];
+            newLine[i] = newBoardDepth[i][col];
+        }
+    }
+
+    int nonZeros = 0, oldSum = 0, newSum = 0;
+    for(int i = 0; i < length; i++) {
+        if(oldLine[i] != 0) {
+            nonZeros++;
+            oldSum += oldLine[i];
+            newSum += newLine[i];
+        } else {
+            if(nonZeros > 1 && (newSum - oldSum) == nonZeros) {
+                //a valid word on the same line must be at least 2 letters long
+                //anything less than 2 letters long is not a word so covering it is fine
+                //if a word is fully covered then the new sum is = old sum + the length of the word
+                return false;
+            }
+            nonZeros = 0;
+            oldSum = 0;
+            newSum = 0;
+        }
+    }
+
     return true;
 }
 
