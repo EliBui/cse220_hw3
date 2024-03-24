@@ -49,9 +49,6 @@ GameState *initialize_game_state(const char *filename) {
                 // printf("%d %d %c |", i, j, c);
                 board[i][j] = c;
                 boardDepth[i][j] = (c == '.') ? 0 : 1;
-                if (c != '.') {
-                    firstWord = false;
-                }
             } else {
                 j--;
             }
@@ -401,8 +398,14 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
         newBoardDepth[i] = (int *)malloc(newGame->numOfCol * sizeof(int));
     }
 
+    //fill in newBoard and newBoardDepth
     for(int r = 0; r < newGame->numOfRow; r++) {
         for(int c = 0; c < newGame->numOfCol; c++) {
+            //check if the word being place is the first word on the board
+            if(firstWord && r < game->numOfRow && c < game->numOfCol && board[r][c] != '.') {
+                firstWord = false;
+            }
+
             if((direction == 'H' && r == row && c >= col && c < col+tilesLen && *tiles != ' ') ||
                 (direction == 'V' && r >= row && c == col && r < row+tilesLen && *tiles != ' ')) {
                 //falls within tiles on the board
@@ -432,6 +435,12 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
 
     newGame->board = newBoard;
     newGame->boardDepth = newBoardDepth;
+
+    //if it is the first word, make sure the length is at least 2
+    if(firstWord && tilesLen < 2) {
+        *num_tiles_placed = 0;
+        return game;
+    }
 
     //check full cover or if connected to existing word
     if(!firstWord && !connectToExistingWord) {
