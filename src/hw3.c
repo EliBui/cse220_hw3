@@ -62,7 +62,7 @@ GameState *initialize_game_state(const char *filename) {
     game->boardDepth = boardDepth;
     game->boardDepth = boardDepth;
     game->previous = NULL;
-
+    fclose(file);
     return game;
 }
 
@@ -143,8 +143,8 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
     (void)col;
     (void)direction;
     (void)tiles;
-
-    if(row < 0 || col < 0 || row > game->numOfRow || col > game->numOfCol) {
+    
+    if(row < 0 || col < 0 || row >= game->numOfRow || col >= game->numOfCol) {
         return false;
     } else if (direction != 'H' && direction != 'V') {
         return false;
@@ -298,6 +298,7 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
             }
         }
     }
+    fclose(wordTxt);
 
     for(int i = 0; i < allWordsIndex; i++) {
         if(!allWordsBool[i]) {

@@ -10,14 +10,12 @@ int main(void) {
 
     int num_tiles_placed; (void) num_tiles_placed;
 
-	GameState *game = initialize_game_state("./tests/boards/board02.txt");
-    game = place_tiles(game, 0, 0, 'H', "CAT", &num_tiles_placed);
-    printf("tiles placed: %d\n", num_tiles_placed);//3
-    game = place_tiles(game, 0, 0, 'H', "DOG", &num_tiles_placed);
+	GameState *game = initialize_game_state("./tests/boards/board08.txt"); 
+    game = place_tiles(game, 6, 13, 'H', "ROID", &num_tiles_placed);
     printf("tiles placed: %d\n", num_tiles_placed);//0
     save_game_state(game, actual_filename);
 
-    // const char *expected_filename = "./tests/expected_outputs/invalid_placement02.txt"; 
+    // const char *expected_filename = "./tests/expected_outputs/invalid_horiz_touch06.txt"; 
 
     free_game_state(game);
 
