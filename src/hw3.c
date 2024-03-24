@@ -221,7 +221,7 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
             fullWordCreated[index] = board[r][c];
         } else {
             fullWordCreated[index] = *tiles;
-            if(boardDepth[r][c] == 5) {//check if depth will be taller than 5
+            if(r < game->numOfRow && c < game->numOfCol && (boardDepth[r][c] == 5 || board[r][c] == *tiles)) {//check if depth will be taller than 5
                 free2DArr((void **)allWords, allWordsIndex);
                 free(allWordsBool);
                 return false;
