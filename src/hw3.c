@@ -133,6 +133,13 @@ char *extractSideChar(GameState *game, int row, int col, char direction, const c
     return str;
 }
 
+void free2DArr(void **arr, int length) {//void ** so it can take both int and char
+    for(int i = 0; i < length; i++) {
+        free(arr[i]);
+    }
+    free(arr);
+}
+
 bool checkValid(GameState *game, int row, int col, char direction, const char *tiles) {
     (void)game;
     (void)row;
@@ -156,7 +163,7 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
     // bool stuffBefore = false, spaceInTiles = false, stuffAfter = false;//for checking if covers up the entire previous word
 
     int tilesLen = strlen(tiles);
-    char **allWords = (char **)malloc(tilesLen * sizeof(char*) + 1);
+    char **allWords = (char **)malloc(tilesLen * sizeof(char*) + 1);//+1 for tiles too
     // for(int i = 0; i < tilesLen; i++) {
     //     allWords[i] = (char *)malloc(46 * sizeof(char));
     // }
@@ -213,6 +220,8 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
         } else {
             fullWordCreated[index] = *tiles;
             if(boardDepth[r][c] == 5) {//check if depth will be taller than 5
+                free2DArr((void **)allWords, tilesLen+1);
+                free(allWordsBool);
                 return false;
             }
             if(r < game->numOfRow && c < game->numOfCol) {
@@ -292,17 +301,21 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
 
     for(int i = 0; i < allWordsIndex; i++) {
         if(!allWordsBool[i]) {
+            free2DArr((void **)allWords, tilesLen+1);
+            free(allWordsBool);
             return false;
         }
     }
 
+    free2DArr((void **)allWords, tilesLen+1);
+    free(allWordsBool);
     return true;
 }
 
 bool checkCoverFullWord(GameState *game, GameState *newGame, int row, int col, char direction) {
-    int length = (direction == 'H') ? game->numOfRow : game->numOfCol;
-    char **oldBoardDepth = game->boardDepth;
-    char **newBoardDepth = newGame->boardDepth;
+    int length = (direction == 'V') ? game->numOfRow : game->numOfCol;
+    int **oldBoardDepth = game->boardDepth;
+    int **newBoardDepth = newGame->boardDepth;
     int oldLine[length];
     int newLine[length];//we dont care about elements that are beyond the old board
 
@@ -390,14 +403,14 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
                 (direction == 'V' && r >= row && c == col && r < row+tilesLen && *tiles != ' ')) {
                 //falls within tiles on the board
                 newBoard[r][c] = *tiles;
-                printf("%d %d %c |", r, c, newBoard[r][c]);
+                // printf("%d %d %c |", r, c, newBoard[r][c]);
                 tiles++;
                 newBoardDepth[r][c] = boardDepth[r][c]+1;
                 tilesPlaced++;
             } else if(r >= game->numOfRow || c >= game->numOfCol) {
                 //falls outside the bound of the old board
                 newBoard[r][c] = '.';
-                printf("%d %d %c |", r, c, newBoard[r][c]);
+                // printf("%d %d %c |", r, c, newBoard[r][c]);
                 newBoardDepth[r][c] = 0;
             } else {
                 //copied from old board
@@ -407,7 +420,7 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
                     tiles++;
                 }
                 newBoard[r][c] = board[r][c];
-                printf("%d %d %c |", r, c, newBoard[r][c]);
+                // printf("%d %d %c |", r, c, newBoard[r][c]);
                 newBoardDepth[r][c] = boardDepth[r][c];
             }
         }
@@ -416,8 +429,8 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
     newGame->board = newBoard;
     newGame->boardDepth = newBoardDepth;
 
-    //check overlap or if connected to existing word
-    if((!firstWord && !connectToExistingWord) || checkCoverFullWord(game, newGame, row, col, direction)) {
+    //check full cover or if connected to existing word
+    if((!firstWord && !connectToExistingWord) || !checkCoverFullWord(game, newGame, row, col, direction)) {
         *num_tiles_placed = 0;
         return game;
     }
@@ -428,16 +441,51 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
     return newGame;
 }
 
-GameState *undo_place_tiles(GameState *game) {
-    (void)game;
-    return NULL;
+void free_game_state(GameState *game) {
+    (void) game;
+
+    GameState *temp;
+    do {
+        free2DArr((void **)game->board, game->numOfRow);
+        free2DArr((void **)game->boardDepth, game->numOfRow);
+        temp = game;
+        game = game->previous;
+        free(temp);
+    } while(game != NULL);
 }
 
-void free_game_state(GameState *game) {
-    (void)game;
+GameState *undo_place_tiles(GameState *game) {
+    (void) game;
+
+    if(game->previous == NULL) {
+        return game;
+    } else {
+        GameState *previousGame = game->previous;
+        game->previous = NULL;
+        free_game_state(game);
+        return previousGame;
+    }
 }
 
 void save_game_state(GameState *game, const char *filename) {
     (void)game;
     (void)filename;
+
+    FILE *file = fopen(filename, "w");
+    char **board = game->board;
+    int **boardDepth = game->boardDepth;
+
+    for(int i = 0; i < game->numOfRow; i++) {
+        for(int j = 0; j < game->numOfCol; j++) {
+            fprintf(file, "%c", board[i][j]);
+        }
+        fprintf(file, "\n");
+    }
+
+    for(int i = 0; i < game->numOfRow; i++) {
+        for(int j = 0; j < game->numOfCol; j++) {
+            fprintf(file, "%d", boardDepth[i][j]);
+        }
+        fprintf(file, "\n");
+    }
 }
