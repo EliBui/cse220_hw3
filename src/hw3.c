@@ -18,8 +18,8 @@ GameState *initialize_game_state(const char *filename) {
     (void)filename;
     FILE *file = fopen(filename, "r");
     char c;
-    char numOfRow = 0;
-    char numOfCol = 0;
+    int numOfRow = 0;
+    int numOfCol = 0;
     while (fscanf(file, "%c", &c) == 1) {
         if (c != '\n') {
             if (numOfRow == 0) {
