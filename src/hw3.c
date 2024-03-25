@@ -221,6 +221,7 @@ bool checkValid(GameState *game, int row, int col, char direction, const char *t
             if(r < game->numOfRow && c < game->numOfCol && (boardDepth[r][c] == 5 || board[r][c] == *tiles)) {//check if depth will be taller than 5
                 free2DArr((void **)allWords, allWordsIndex);
                 free(allWordsBool);
+                free(fullWordCreated);
                 return false;
             }
             if(r < game->numOfRow && c < game->numOfCol) {
@@ -441,25 +442,21 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
     //if it is the first word, make sure the length is at least 2
     if(firstWord && tilesLen < 2) {
         *num_tiles_placed = 0;
-        printf("hello1");
         return game;
     }
 
     //check full cover or if connected to existing word
     if(!firstWord && !connectToExistingWord) {
         *num_tiles_placed = 0;
-        printf("hello2");
         return game;
     } else if(!firstWord && checkCoverFullWord(game, newGame, row, col, direction)) {
         *num_tiles_placed = 0;
-        printf("hello3");
         return game;
     }
     
     newGame->previous = game;
 
     *num_tiles_placed = tilesPlaced;
-    printf("hello4");
     return newGame;
 }
 
