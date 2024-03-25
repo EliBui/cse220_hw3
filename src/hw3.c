@@ -438,19 +438,23 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
 
     newGame->board = newBoard;
     newGame->boardDepth = newBoardDepth;
+    newGame->previous = NULL;
 
     //if it is the first word, make sure the length is at least 2
     if(firstWord && tilesLen < 2) {
         *num_tiles_placed = 0;
+        free_game_state(newGame);
         return game;
     }
 
     //check full cover or if connected to existing word
     if(!firstWord && !connectToExistingWord) {
         *num_tiles_placed = 0;
+        free_game_state(newGame);
         return game;
     } else if(!firstWord && checkCoverFullWord(game, newGame, row, col, direction)) {
         *num_tiles_placed = 0;
+        free_game_state(newGame);
         return game;
     }
     
