@@ -11,7 +11,7 @@
     fprintf(stderr, __VA_ARGS__);               \
     fprintf(stderr, " -- %s()\n", __func__)
 
-bool firstWord = true;
+
 bool connectToExistingWord = false;
 
 GameState *initialize_game_state(const char *filename) {
@@ -360,6 +360,7 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
     (void)direction;
     (void)tiles;
 
+    bool firstWord = true;
     int tilesPlaced = 0;
     connectToExistingWord = false;
     if (!checkValid(game, row, col, direction, tiles)) {
@@ -440,21 +441,25 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
     //if it is the first word, make sure the length is at least 2
     if(firstWord && tilesLen < 2) {
         *num_tiles_placed = 0;
+        printf("hello1");
         return game;
     }
 
     //check full cover or if connected to existing word
     if(!firstWord && !connectToExistingWord) {
         *num_tiles_placed = 0;
+        printf("hello2");
         return game;
     } else if(!firstWord && checkCoverFullWord(game, newGame, row, col, direction)) {
         *num_tiles_placed = 0;
+        printf("hello3");
         return game;
     }
     
     newGame->previous = game;
 
     *num_tiles_placed = tilesPlaced;
+    printf("hello4");
     return newGame;
 }
 
