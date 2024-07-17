@@ -1,4 +1,4 @@
-CSE 220 Homework 3 
+CSE 220 Homework 3  
 Upwords variant in C  
 
 Full homework description here:  
